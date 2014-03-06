@@ -1,0 +1,47 @@
+<?php
+
+/**
+ * Implements hook_menu().
+ */
+function pse_api_menu() {
+    $items = array();
+
+    $items['students'] = array(
+        'title' => t('Current Students'),
+        'page callback' => 'pse_api_current_students',
+        'access arguments' => array('access content'),
+    );
+
+    $items['pse_api/templates/current-students'] = array(
+        'page callback' => 'pse_api_template_current_students',
+        'access arguments' => array('access content'),
+        'type' => MENU_CALLBACK,
+    );
+
+    return $items;
+}
+
+function pse_api_current_students() {
+    $path = drupal_get_path('module', 'pse_api');
+    angularjs_init_application('pseApi');
+    drupal_add_css($path . '/css/app.css');
+    drupal_add_js($path . '/js/app.js');
+    drupal_add_js($path . '/js/constrollers/studentsController.js');
+    return theme('pse_api_students');
+}
+
+function pse_api_theme(){
+    $themes = array();
+
+    $themes['pse_api_students'] = array(
+        'template' => 'theme/students',
+        'parameters' => array(),
+    );
+
+    $themes['pse_api_current_students_table'] = array(
+        'template' => 'theme/current-students-table',
+        'parameters' => array(),
+    );
+
+    return $themes;
+}

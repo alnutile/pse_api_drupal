@@ -1,0 +1,8 @@
+name = PSE Frontend to API
+description = Front end to the API site
+package = PSE
+core = 7.x
+dependencies[] = composer_manager
+dependencies[] = angularjs
+
+
