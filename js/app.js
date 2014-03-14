@@ -1,18 +1,27 @@
 'use strict';
 
-var pse_api = angular.module('pse_api', [
+
+var pse_api = angular.module('pseApi', [
     'ngRoute',
+    'pseServices',
     'studentsController',
-    'ngSanitize',
-    'ngTable'
+    'bannerService',
+    'ui.bootstrap',
+    'bannersController'
 ]);
 
 pse_api.config(['$routeProvider',
     function ($routeProvider) {
+        var path = Drupal.settings.pse_api.full_path;
+        console.log(path);
         $routeProvider.
+            when('/', {
+               templateUrl: '/' + path + '/theme/current-students-table.html',
+               controller:  'StudentsController'
+            }).
             when('/current-students', {
-                templateUrl: '/pse_api/templates/current-students',
-                controller: 'studentsController'
+                templateUrl: '/' + path + '/theme/current-students-table.html',
+                controller: 'StudentsController'
             }).
             otherwise({
                 redirectTo: '/'

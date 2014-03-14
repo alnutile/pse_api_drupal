@@ -1,0 +1,18 @@
+.region-header .region-inner {
+    padding: 0;
+}
+
+.nav, .pagination, .carousel, .panel-title a { cursor: pointer; }
+
+.content-inner #main-content {
+    margin-right: 0;
+    margin-left: 0;
+}
+
+#main-content header#main-content-header h1#page-title {
+    display: none;
+}
+
+.ng-content {
+    padding: 10px;
+}

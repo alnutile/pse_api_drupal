@@ -12,21 +12,51 @@ function pse_api_menu() {
         'access arguments' => array('access content'),
     );
 
-    $items['pse_api/templates/current-students'] = array(
-        'page callback' => 'pse_api_template_current_students',
+    $items['api/v1/banners'] = array(
+        'page callback' => 'pse_api_banners',
         'access arguments' => array('access content'),
-        'type' => MENU_CALLBACK,
+        'type' => MENU_CALLBACK
     );
 
     return $items;
 }
 
+
+function pse_api_banners() {
+    $banners = [];
+    $query = db_query("SELECT node.nid AS nid, 'node' AS field_data_field_banner_image_node_entity_type, RAND() AS random_field
+                FROM
+                {node} node
+                WHERE (( (node.status = '1') AND (node.type IN  ('site_banner')) ))
+                ORDER BY random_field ASC");
+    if($query) {
+        while ($row = $query->fetchAssoc()) {
+            $banners[] = $row['nid'];
+        }
+        $banner_output = entity_load('node', $banners);
+        $count = 1;
+        foreach($banner_output as $key => $value) {
+            $active = ($count == 1) ? 1 : 0;
+            $count++;
+            $uri[] = array('image' => file_create_url($value->field_banner_image['und'][0]['uri']), 'active' => $active);
+        }
+    }
+    drupal_json_output($uri);
+    exit();
+}
+
 function pse_api_current_students() {
     $path = drupal_get_path('module', 'pse_api');
+    drupal_add_js(array('pse_api' => array('full_path' => $path)), 'setting');
     angularjs_init_application('pseApi');
     drupal_add_css($path . '/css/app.css');
+    drupal_add_css($path . '/css/bootstrap.css');
+    drupal_add_js($path . '/js/services/pse_students.js');
+    drupal_add_js($path . '/js/services/bannerService.js');
+    drupal_add_js($path . '/js/library/ui-bootstrap-tpls-0.1.0.min.js');
+    drupal_add_js($path . '/js/controllers/studentsController.js');
+    drupal_add_js($path . '/js/controllers/bannersController.js');
     drupal_add_js($path . '/js/app.js');
-    drupal_add_js($path . '/js/constrollers/studentsController.js');
     return theme('pse_api_students');
 }
 
@@ -35,11 +65,6 @@ function pse_api_theme(){
 
     $themes['pse_api_students'] = array(
         'template' => 'theme/students',
-        'parameters' => array(),
-    );
-
-    $themes['pse_api_current_students_table'] = array(
-        'template' => 'theme/current-students-table',
         'parameters' => array(),
     );
 
