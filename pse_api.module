@@ -12,8 +12,27 @@ function pse_api_menu() {
         'access arguments' => array('access content'),
     );
 
+    $items['api/v1/menu/%'] = array(
+        'page callback' => 'pse_api_menu_endpoint',
+        'page arguments' => array(3),
+        'access arguments' => array('access content'),
+        'type' => MENU_CALLBACK
+    );
+
     $items['api/v1/banners'] = array(
         'page callback' => 'pse_api_banners',
+        'access arguments' => array('access content'),
+        'type' => MENU_CALLBACK
+    );
+
+    $items['api/v1/blocks'] = array(
+        'page callback' => 'pse_api_blocks_endpoint',
+        'access arguments' => array('access content'),
+        'type' => MENU_CALLBACK
+    );
+
+    $items['api/v1/custom_blocks'] = array(
+        'page callback' => 'pse_api_custom_blocks_endpoint',
         'access arguments' => array('access content'),
         'type' => MENU_CALLBACK
     );
@@ -21,6 +40,93 @@ function pse_api_menu() {
     return $items;
 }
 
+
+
+function pse_api_custom_blocks_endpoint() {
+    $args = array_slice(arg(), 3);
+    $b = [];
+    //1. get name
+    foreach($args as $v) {
+        $query = db_query("SELECT title, menu_name from {menu_custom}
+                    WHERE menu_name LIKE :name LIMIT 1", array(':name' => $v));
+        if($query) {
+            while($block = $query->fetchAssoc()) {
+                $b_parent = array('title' => $block['title']);
+            }
+        }
+    }
+    //2. get items in menu
+    foreach($args as $v) {
+        $query = db_query("SELECT link_title, link_path, mlid from {menu_links}
+                    WHERE menu_name LIKE :name ORDER BY weight", array(':name' => $v));
+        if($query) {
+            while($block = $query->fetchAssoc()) {
+                $b_kids[$block['mlid']] = array('title' => $block['link_title'], 'content' => $block['link_path']);
+            }
+        }
+    }
+    //@TODO merge with the menu query below
+    $menu['parent'] = $b_parent;
+    $menu['kids']   = $b_kids;
+    drupal_json_output($menu);
+    exit();
+}
+
+function pse_api_blocks_endpoint() {
+    $args = array_slice(arg(), 3);
+    $b = [];
+
+    foreach($args as $v) {
+        $query = db_query("SELECT title, body from {block} as b INNER JOIN {block_custom} as bc ON b.bid = bc.bid WHERE b.bid = :bid", array(':bid' => $v));
+        if($query) {
+            while($block = $query->fetchAssoc()) {
+                $b[$block['mlid']] = array('title' => $block['title'], 'content' => $block['body']);
+            }
+        }
+    }
+    drupal_json_output($b);
+    exit();
+}
+
+function pse_api_menu_endpoint($mlid){
+    $menu = [];
+
+    $query = db_query("SELECT * FROM {menu_links} WHERE mlid = :mlid", array(':mlid' => $mlid));
+    $kids_list = [];
+    $menu = [];
+    if($query) {
+        while($row = $query->fetchAssoc()){
+          $menu['parent'] = pse_api_menu_results_array($row);
+          if($row['has_children'] == 1) {
+              $kids_query = pse_api_menu_kids_query($mlid);
+              if($kids_query) {
+                  while($row_kid = $kids_query->fetchAssoc()) {
+                      $kids_list[$row_kid['mlid']] = pse_api_menu_results_array($row_kid);
+                      if($row_kid['has_children'] == 1) {
+                          $kids_query2 = pse_api_menu_kids_query($row_kid['mlid']);
+                          if($kids_query2) {
+                              while($row_kid2 = $kids_query2->fetchAssoc()) {
+                                  $kids_list[$row_kid['mlid']]['kids'][$row_kid2['mlid']] = pse_api_menu_results_array($row_kid2);
+                              }
+                          }
+                      }
+                  }
+              }
+          }
+        };
+    }
+    $menu['parent']['kids'] = $kids_list;
+    drupal_json_output($menu);
+    exit();
+}
+
+function pse_api_menu_results_array($row) {
+    return array('src' => $row['link_path'], 'title' => $row['link_title'], 'mlid' => $row['mlid']);
+}
+
+function pse_api_menu_kids_query($plid) {
+    return db_query("SELECT * FROM {menu_links} WHERE plid = :plid ORDER BY weight ", array(':plid' => $plid));
+}
 
 function pse_api_banners() {
     $banners = [];
@@ -53,10 +159,13 @@ function pse_api_current_students() {
     drupal_add_css($path . '/css/bootstrap.css');
     drupal_add_js($path . '/js/services/pse_students.js');
     drupal_add_js($path . '/js/services/bannerService.js');
+    drupal_add_js($path . '/js/services/customMenuService.js');
+    drupal_add_js($path . '/js/services/menuService.js');
     drupal_add_js($path . '/js/library/ui-bootstrap-tpls-0.1.0.min.js');
+    drupal_add_js($path . '/js/library/angular-mocks.js');
     drupal_add_js($path . '/js/controllers/studentsController.js');
     drupal_add_js($path . '/js/controllers/bannersController.js');
-    drupal_add_js($path . '/js/app.js');
+    drupal_add_js($path . '/js/app_dev.js');
     return theme('pse_api_students');
 }
 

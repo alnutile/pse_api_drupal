@@ -1,0 +1,20 @@
+<div class="menu-block-wrapper menu-block-ctools-main-menu-1 menu-name-main-menu parent-mlid-main-menu:0 menu-level-2">
+    <ul class="menu">
+
+        <li class="first last expanded active-trail menu-mlid-{{ menu.parent.mlid }} menu-depth-1 menu-item-{{ menu.parent.mlid }}">
+            <a href="/{{menu.parent.src}}" class="active-trail">
+                {{menu.parent.title}}
+            </a>
+            <ul class="menu">
+                <li ng-repeat="kid in menu.parent.kids" ng-class="{'expanded menu-depth-2': getSize(kid.kids) }" class="leaf">
+                    <a href="/{{ kid.src}}">{{ kid.title }}</a>
+                    <ul class="menu" ng-if="getSize(kid.kids)">
+                        <li ng-repeat="kid2 in kid.kids" class="leaf">
+                            <a href="/{{ kid2.src }}">{{ kid2.title }}</a>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+        </li>
+    </ul>
+</div>

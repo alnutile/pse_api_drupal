@@ -1,0 +1,10 @@
+ <section class="panel-pane pane-block pane-menu-menu-student-of-interest block">
+     <div class="block-inner clearfix">
+         <h2 class="pane-title block-title">{{custom_block.parent.title}}</h2>
+         <ul class="menu">
+             <li ng-repeat="kid in custom_block.kids" class="leaf">
+                 <a href="/{{ kid.src}}">{{ kid.title }}</a>
+             </li>
+         </ul>
+     </div>
+ </section>
