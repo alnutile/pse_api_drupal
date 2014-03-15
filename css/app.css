@@ -16,3 +16,11 @@
 .ng-content {
     padding: 10px;
 }
+
+li.ng-scope.expanded ul {
+    padding-left: 8px;
+}
+
+.ng-scope table {
+    margin: 0;
+}

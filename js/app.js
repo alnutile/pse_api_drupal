@@ -6,6 +6,8 @@ var pse_api = angular.module('pseApi', [
     'pseServices',
     'studentsController',
     'bannerService',
+    'menuService',
+    'customMenuService',
     'ui.bootstrap',
     'bannersController'
 ]);
@@ -13,7 +15,6 @@ var pse_api = angular.module('pseApi', [
 pse_api.config(['$routeProvider',
     function ($routeProvider) {
         var path = Drupal.settings.pse_api.full_path;
-        console.log(path);
         $routeProvider.
             when('/', {
                templateUrl: '/' + path + '/theme/current-students-table.html',
