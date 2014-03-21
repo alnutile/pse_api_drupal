@@ -165,7 +165,8 @@ function pse_api_current_students() {
     drupal_add_js($path . '/js/library/angular-mocks.js');
     drupal_add_js($path . '/js/controllers/studentsController.js');
     drupal_add_js($path . '/js/controllers/bannersController.js');
-    drupal_add_js($path . '/js/app_dev.js');
+    //drupal_add_js($path . '/js/app_dev.js');
+    drupal_add_js($path . '/js/app.js');
     return theme('pse_api_students');
 }
 
